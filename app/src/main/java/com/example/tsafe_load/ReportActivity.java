@@ -1,5 +1,7 @@
 package com.example.tsafe_load;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -8,7 +10,7 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class ReportActivity extends AppCompatActivity {
+public class ReportActivity extends Activity {
     Button lightReport;
     Button otherReport;
 

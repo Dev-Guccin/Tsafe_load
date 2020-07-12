@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.widget.RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,12 +14,31 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
     </LinearLayout>
-    <Button
-        android:id="@+id/search_load"
-        android:layout_width="117dp"
-        android:layout_height="wrap_content"
-        android:text="길찾기"/>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+        <Button
+            android:id="@+id/search_load"
+            android:layout_width="117dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_load"
+            android:text="길찾기"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"/>
+    </RelativeLayout>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:clickable="true"
+        android:src="@android:drawable/ic_menu_mylocation"
+        app:backgroundTint="@color/colorAccent"
+        app:useCompatPadding="true" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
