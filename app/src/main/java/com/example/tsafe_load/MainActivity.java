@@ -3,6 +3,7 @@ package com.example.tsafe_load;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -18,6 +19,7 @@ import android.view.ViewManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
     public TMapView tMapView;
 
     Button srchButton;
+    View Street_lamp;
+    View Street_police;
+    View Street_setting;
+    LinearLayout linearLayoutTmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +57,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         srchButton = (Button)findViewById(R.id.search_load);
-        LinearLayout linearLayoutTmap = (LinearLayout)findViewById(R.id.linearLayoutTmap);
+        linearLayoutTmap = (LinearLayout)findViewById(R.id.linearLayoutTmap);
+        Street_lamp  = (View)findViewById(R.id.Street_lamp);
+        Street_police  = (View)findViewById(R.id.Street_police);
+        Street_setting  = (View)findViewById(R.id.Street_setting);
+
+
         tMapView = new TMapView(this);
 
         tMapView.setSKTMapApiKey("l7xx62fb5e4a60904039a3d5ff7e62318cd2");
@@ -132,6 +143,26 @@ public class MainActivity extends AppCompatActivity {
                 //Toast.makeText(MainActivity.this, "zoomLevel=" + zoom + "\nlon=" + centerPoint.getLongitude() + "\nlat=" + centerPoint.getLatitude(), Toast.LENGTH_SHORT).show();
             }
         });
+        Street_lamp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        Street_police.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        Street_setting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ReportActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     public void setmark(double[] GPS, String name){

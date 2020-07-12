@@ -18,8 +18,51 @@
         android:layout_width="117dp"
         android:layout_height="wrap_content"
         android:text="길찾기"/>
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <RelativeLayout
+            android:layout_width="136dp"
+            android:layout_height="60dp"
+            android:background="#80ffffff">
+            <view
+                android:id="@+id/Street_lamp"
+                class="androidx.appcompat.widget.AppCompatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/icon_street_lamp"
+                android:alpha=".3"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="136dp"
+            android:layout_height="60dp"
+            android:background="#80ffffff">
+            <view
+                android:id="@+id/Street_police"
+                class="androidx.appcompat.widget.AppCompatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/police"
+                android:alpha=".3"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="126dp"
+            android:layout_height="60dp"
+            android:background="#80ffffff">
+
+            <view
+                android:id="@+id/Street_setting"
+                class="androidx.appcompat.widget.AppCompatButton"
+                android:layout_width="107dp"
+                android:layout_height="59dp"
+                android:layout_centerInParent="true"
+                android:background="@android:drawable/ic_menu_help" />
+        </RelativeLayout>
+    </LinearLayout>
+
 
 </android.widget.RelativeLayout>
