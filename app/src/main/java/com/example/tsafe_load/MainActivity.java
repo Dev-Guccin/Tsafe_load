@@ -49,7 +49,10 @@ import com.skt.Tmap.TMapView;
 
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +78,9 @@ public class MainActivity extends Activity {
     TMapMarkerItem markerStart = new TMapMarkerItem();
     TMapMarkerItem markerEnd = new TMapMarkerItem();
     TMapMarkerItem markerCur = new TMapMarkerItem();
+
+    TMapMarkerItem[] streetLight = new TMapMarkerItem[100];
+
 
     public double[] startGPS = new double[2];
     public String startName;
@@ -124,101 +130,15 @@ public class MainActivity extends Activity {
         tMapView.setSKTMapApiKey("l7xx62fb5e4a60904039a3d5ff7e62318cd2");
         linearLayoutTmap.addView(tMapView);
 
+        //가로등 객체배열 초기화 선언
+        for(int i=0; i<100; i++){
+            streetLight[i] = new TMapMarkerItem();
+        }
         srchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), FindLoad.class);
                 startActivityForResult(intent,200);
-                /*LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                final LinearLayout ii = (LinearLayout) inflater.inflate(R.layout.searching_road, null);
-                ii.setBackgroundColor(Color.parseColor("#99000000"));
-                LinearLayout.LayoutParams paramll = new LinearLayout.LayoutParams
-                        (LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
-                addContentView(ii, paramll);
-                LinearLayout iioutline = ii.findViewById(R.id.외부);
-                final EditText iistart = ii.findViewById(R.id.출발지);
-                final ImageButton iistartsearch = ii.findViewById(R.id.출발지검색);
-                final EditText iiterminate = ii.findViewById(R.id.도착지);
-                Button iibutton = ii.findViewById(R.id.동선조회);
-
-                iistart.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable editable) {
-                        // input창에 문자를 입력할때마다 호출된다.
-                        // search 메소드를 호출한다.
-                    }
-                });
-
-                iibutton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d("똥선", iistart.getText().toString());
-                        Log.d("똥선", iiterminate.getText().toString());
-                        FindWay findway = new FindWay();
-                        findway.startGPS = findway.getGPS(iistart.getText().toString());
-                        findway.endGPS = findway.getGPS(iiterminate.getText().toString());
-
-
-                        Log.d("출발지", findway.startGPS.toString());
-                        Log.d("도착지", findway.endGPS.toString());
-                        //findway.find_way();
-                        setmark(findway.startGPS, iistart.getText().toString(), markerStart);
-                        setmark(findway.endGPS, iiterminate.getText().toString(), markerEnd);
-                        ((ViewManager) ii.getParent()).removeView(ii);
-
-                        Down down = new Down();
-                        down.execute(findway.startGPS[0], findway.startGPS[1], findway.endGPS[0], findway.endGPS[1]);
-                    }
-                });
-                iioutline.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d("똥선", "아웃");
-                        ((ViewManager) ii.getParent()).removeView(ii);
-                    }
-                });
-                iistartsearch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            new Search().execute(iistart.getText().toString()).get();
-                            Log.d("플래그", String.valueOf(flag));
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        ArrayList<String> addresslist = new ArrayList<>();
-
-                        Log.d("플래그", String.valueOf(flag));
-                        //poi에 있는 주소를 긁어옴
-                        flag = false;
-                        Log.d("사이즈", Integer.toString(tmppoi.size()));
-                        for(int i =0; i< tmppoi.size(); i++){
-                            addresslist.add(tmppoi.get(i).name);//주소를 하나씩 입력한다.
-                            Log.d("POI", addresslist.get(i));
-                        }
-
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                                MainActivity.this, //context(액티비티 인스턴스)
-                                android.R.layout.simple_list_item_1, // 한 줄에 하나의 텍스트 아이템만 보여주는 레이아웃 파일
-                                // 한 줄에 보여지는 아이템 갯수나 구성을 변경하려면 여기에 새로만든 레이아웃을 지정하면 됩니다.
-                                addresslist  // 데이터가 저장되어 있는 ArrayList 객체
-                        );
-                        ListView listview = findViewById(R.id.address_list);
-                        listview.setAdapter(adapter);
-                    }
-                });*/
-
             }
         });
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -284,7 +204,71 @@ public class MainActivity extends Activity {
         Street_lamp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputStream is = getResources().openRawResource(R.raw.streetlight);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                try {
+                    String line;
+                    String[] info;
+                    String addressname;
+                    double[] GPS = new double[2];
+                    int index = 0;
+                    while ((line = reader.readLine()) != null) {//라인별로 마킹표시
+                        if(line.contains("표찰"))
+                            continue;
+                        if(index == 100){
+                            return;
+                        }
+                        info = line.split(",");
+                        addressname = info[1];
+                        GPS[1] = Double.parseDouble(info[3]);//lon
+                        GPS[0] = Double.parseDouble(info[4]);//lat
+                        //검증 시작 경로에서 가까운 값들 뽑아내기
+                        if(startGPS[0] < endGPS[0]){//위도 검증
+                            if(startGPS[0] < GPS[0] && endGPS[0] > GPS[0]){
+                                if(startGPS[1] < endGPS[1]){//경도 검증
+                                    if(startGPS[1] < GPS[1] && endGPS[1] > GPS[1]){
+                                        //검증 성공 출발지와 도착지 중간의 값임
+                                        setmark(GPS,"light"+addressname,streetLight[index]);
+                                        index++;
+                                    }
+                                }else{
+                                    if(startGPS[1] > GPS[1] && endGPS[1] < GPS[1]){
+                                        setmark(GPS,"light"+addressname,streetLight[index]);
+                                        index++;
+                                    }
+                                }
+                            }
+                        }else{
+                            if(startGPS[0] > GPS[0] && endGPS[0] < GPS[0]){
+                                if(startGPS[1] < endGPS[1]) {//경도 검증
+                                    if (startGPS[1] < GPS[1] && endGPS[1] > GPS[1]) {
+                                        //위도 경도 검증 종료
+                                        setmark(GPS,"light"+addressname,streetLight[index]);
+                                        index++;
+                                    }
+                                }else{
+                                    if(startGPS[1] > GPS[1] && endGPS[1] < GPS[1]){
+                                        setmark(GPS,"light"+addressname,streetLight[index]);
+                                        index++;
+                                    }
+                                }
+                            }
+                        }
 
+                        Log.d("라인", info[3] + info[4]);
+                    }
+                }
+                catch (IOException ex) {
+                    // handle exception
+                }
+                finally {
+                    try {
+                        is.close();
+                    }
+                    catch (IOException e) {
+                        // handle exception
+                    }
+                }
             }
         });
         Street_police.setOnClickListener(new View.OnClickListener() {
@@ -334,6 +318,9 @@ public class MainActivity extends Activity {
         Bitmap bitmap;
         if(name.equals("current"))
             bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.current);
+        else if(name.contains("light")){
+            bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.street_light_icon);
+        }
         else
             bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.location);
         markerItem1.setIcon(bitmap); // 마커 아이콘 지정
