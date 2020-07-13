@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:hapticFeedbackEnabled="false">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:hapticFeedbackEnabled="false"
+        android:orientation="vertical">
+
         <Button
+            android:id="@+id/light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="신고하기"
-            android:id="@+id/light"/>
+            android:text="신고하기" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="가로등 신고를 진행합니다."
-            android:paddingBottom="100dp"/>
+            android:paddingBottom="100dp"
+            android:text="가로등 신고를 진행합니다." />
+
         <Button
+            android:id="@+id/other"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="기타문제 피드백"
-            android:id="@+id/other"/>
+            android:text="기타문제 피드백" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="가로등을 제외한 다양한 건의사항을 신고합니다."/>
+            android:text="가로등을 제외한 다양한 건의사항을 신고합니다." />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

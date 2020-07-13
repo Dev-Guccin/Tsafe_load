@@ -1,10 +1,8 @@
 package com.example.tsafe_load;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -21,14 +19,23 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.BoringLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewManager;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,19 +47,21 @@ import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapPolyLine;
 import com.skt.Tmap.TMapView;
 
-import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.nio.DoubleBuffer;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
 
 
 public class MainActivity extends Activity {
+    ArrayList<TMapPOIItem> tmppoi = new ArrayList<>();
+    boolean flag = false;
+
     public TMapView tMapView;
     LocationManager lm;
 
@@ -67,6 +76,35 @@ public class MainActivity extends Activity {
     TMapMarkerItem markerEnd = new TMapMarkerItem();
     TMapMarkerItem markerCur = new TMapMarkerItem();
 
+    public double[] startGPS = new double[2];
+    public String startName;
+    public double[] endGPS = new double[2];
+    public String endName;
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 200) {
+            if (resultCode == 200) {
+
+                Toast.makeText(MainActivity.this, "Result: " + data.getStringExtra("start_address")+"\n"+
+                        "lat: " + data.getDoubleExtra("start_lat",1.0)+"\n"+
+                        "lon: "+data.getDoubleExtra("start_lon", 1.0), Toast.LENGTH_SHORT).show();
+                //출발지와 도착지의 GPS좌표값 저장
+                startName = data.getStringExtra("start_address");
+                startGPS[0]=data.getDoubleExtra("start_lat",1.0);
+                startGPS[1]=data.getDoubleExtra("start_lon",1.0);
+                endName = data.getStringExtra("end_address");
+                endGPS[0]=data.getDoubleExtra("end_lat",1.0);
+                endGPS[1]=data.getDoubleExtra("end_lon",1.0);
+                setmark(startGPS,startName, markerStart);
+                setmark(endGPS, endName, markerEnd);
+                Down down = new Down();
+                down.execute(startGPS[0], startGPS[1], endGPS[0], endGPS[1]);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +127,9 @@ public class MainActivity extends Activity {
         srchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                Intent intent = new Intent(getApplicationContext(), FindLoad.class);
+                startActivityForResult(intent,200);
+                /*LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 final LinearLayout ii = (LinearLayout) inflater.inflate(R.layout.searching_road, null);
                 ii.setBackgroundColor(Color.parseColor("#99000000"));
                 LinearLayout.LayoutParams paramll = new LinearLayout.LayoutParams
@@ -97,9 +137,26 @@ public class MainActivity extends Activity {
                 addContentView(ii, paramll);
                 LinearLayout iioutline = ii.findViewById(R.id.외부);
                 final EditText iistart = ii.findViewById(R.id.출발지);
+                final ImageButton iistartsearch = ii.findViewById(R.id.출발지검색);
                 final EditText iiterminate = ii.findViewById(R.id.도착지);
-                final TextView iiresult = ii.findViewById(R.id.결과GPS);
                 Button iibutton = ii.findViewById(R.id.동선조회);
+
+                iistart.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        // input창에 문자를 입력할때마다 호출된다.
+                        // search 메소드를 호출한다.
+                    }
+                });
 
                 iibutton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -109,6 +166,8 @@ public class MainActivity extends Activity {
                         FindWay findway = new FindWay();
                         findway.startGPS = findway.getGPS(iistart.getText().toString());
                         findway.endGPS = findway.getGPS(iiterminate.getText().toString());
+
+
                         Log.d("출발지", findway.startGPS.toString());
                         Log.d("도착지", findway.endGPS.toString());
                         //findway.find_way();
@@ -127,6 +186,38 @@ public class MainActivity extends Activity {
                         ((ViewManager) ii.getParent()).removeView(ii);
                     }
                 });
+                iistartsearch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            new Search().execute(iistart.getText().toString()).get();
+                            Log.d("플래그", String.valueOf(flag));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        ArrayList<String> addresslist = new ArrayList<>();
+
+                        Log.d("플래그", String.valueOf(flag));
+                        //poi에 있는 주소를 긁어옴
+                        flag = false;
+                        Log.d("사이즈", Integer.toString(tmppoi.size()));
+                        for(int i =0; i< tmppoi.size(); i++){
+                            addresslist.add(tmppoi.get(i).name);//주소를 하나씩 입력한다.
+                            Log.d("POI", addresslist.get(i));
+                        }
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                                MainActivity.this, //context(액티비티 인스턴스)
+                                android.R.layout.simple_list_item_1, // 한 줄에 하나의 텍스트 아이템만 보여주는 레이아웃 파일
+                                // 한 줄에 보여지는 아이템 갯수나 구성을 변경하려면 여기에 새로만든 레이아웃을 지정하면 됩니다.
+                                addresslist  // 데이터가 저장되어 있는 ArrayList 객체
+                        );
+                        ListView listview = findViewById(R.id.address_list);
+                        listview.setAdapter(adapter);
+                    }
+                });*/
 
             }
         });
@@ -235,6 +326,7 @@ public class MainActivity extends Activity {
         }
     };
 
+
     public void setmark(double[] GPS, String name, TMapMarkerItem marker){
         TMapMarkerItem markerItem1 = marker;
         TMapPoint tMapPoint1 = new TMapPoint(GPS[0], GPS[1]);
@@ -253,7 +345,6 @@ public class MainActivity extends Activity {
 
     }
     private class Down extends AsyncTask<Double, String, Void>{
-
         @Override
         protected Void doInBackground(Double... GPS) {
             double[] start = new double[]{GPS[0],GPS[1]};
@@ -278,44 +369,4 @@ public class MainActivity extends Activity {
             }
         }
     }
-}
-
-class FindWay extends MainActivity{
-    public double[] startGPS = new double[2];
-    public double[] endGPS = new double[2];
-
-    public double[] getGPS(String addressName) {
-        double[] GPS = new double[2];
-        Geocoder geocoder = new Geocoder(this);
-        List<Address> list = null;
-        String str = addressName;
-        try {
-            list = geocoder.getFromLocationName(str, 10); // 지역이름, 읽을갯수
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e("test", "입출력 오류 - 서버에서 주소변환시 에러발생");
-        }
-
-        if (list != null) {
-            if (list.size() == 0) {
-                Log.d("똥선", "해당되는 주소 없음");
-            } else {
-                // 해당되는 주소로 인텐트 날리기
-                Address addr = list.get(0);
-                double lat = addr.getLatitude();
-                double lon = addr.getLongitude();
-
-                String sss = String.format("geo:%f,%f", lat, lon);
-                Log.d("똥선", Double.toString(lat) + "/" + Double.toString(lon));
-                GPS[0] = lat;
-                GPS[1] = lon;
-                return GPS;
-            }
-        }
-        //적당한 위치를 발견하지 못하는 경우
-        GPS[0]=0;
-        GPS[1]=0;
-        return GPS;
-    }
-
 }

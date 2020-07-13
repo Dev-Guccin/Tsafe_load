@@ -21,7 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ReportActivity"/>
+        <activity android:name=".ReportActivity" android:theme="@style/Transparent"/>
+        <activity android:name=".FindLoad" android:theme="@style/Transparent" />
         <activity android:name=".LightReportActivity"/>
         <provider
             android:name="androidx.core.content.FileProvider"
