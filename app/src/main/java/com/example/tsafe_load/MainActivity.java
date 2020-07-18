@@ -127,7 +127,7 @@ public class MainActivity extends Activity {
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         tMapView = new TMapView(this);
 
-        tMapView.setSKTMapApiKey("l7xx62fb5e4a60904039a3d5ff7e62318cd2");
+        tMapView.setSKTMapApiKey("insert your key");
         linearLayoutTmap.addView(tMapView);
 
         //가로등 객체배열 초기화 선언
